@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Товары Wildberries</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #333;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 15px;
+            color: #fff;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Поиск товара на Wildberries</h1>
+    <form id="searchForm" method="POST">
+        <label for="api_key">API-ключ:</label>
+        <input type="text" id="api_key" name="api_key" placeholder="Введите ваш API-ключ" required>
+
+        <label for="article">Артикул:</label>
+        <input type="text" id="article" name="article" placeholder="Введите артикул товара" required>
+
+        <button type="submit">Искать</button>
+    </form>
+
+    <h2>Результат:</h2>
+    <div id="result"></div>
+
+    <script>
+        const form = document.getElementById('searchForm');
+        const resultDiv = document.getElementById('result');
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            resultDiv.innerHTML = "Поиск..."; // Показываем сообщение о загрузке
+
+            const formData = new FormData(form);
+            try {
+                const response = await fetch('/get_goods', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Ошибка сервера: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.error) {
+                    resultDiv.innerHTML = `<span class="error">${data.error}</span>`;
+                } else {
+                    resultDiv.innerHTML = `
+                        <p>Цена: <strong>${data.price}</strong></p>
+                        <p>Цена со скидкой: <strong>${data.discounted_price}</strong></p>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">Произошла ошибка: ${error.message}</span>`;
+            }
+        });
+    </script>
+</body>
+</html>
