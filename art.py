@@ -46,10 +46,15 @@ def get_goods():
         if isinstance(specific_goods, list) and specific_goods:
             for good in specific_goods:
                 if good.get('nmID') == article:
-                    return jsonify({
-                        "price": good['sizes'][0].get('price', 'Цена не указана'),
-                        "discounted_price": good['sizes'][0].get('discountedPrice', 'Цена со скидкой не указана')
-                    })
+                    sizes = good.get('sizes') or []
+                    if sizes:
+                        first_size = sizes[0]
+                        return jsonify({
+                            "price": first_size.get('price', 'Цена не указана'),
+                            "discounted_price": first_size.get('discountedPrice', 'Цена со скидкой не указана')
+                        })
+                    else:
+                        return jsonify({"error": "Информация о размерах недоступна"})
         return jsonify({"error": "Товар не найден"})
     except ValueError:
         return jsonify({"error": "Некорректный артикул"})
